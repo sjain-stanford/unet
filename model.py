@@ -6,9 +6,12 @@
 #
 
 import tensorflow as tf
+from tf.keras.callbacks import ModelCheckpoint, LearningRateScheduler
 
 
 def unet(pretrained_weights=None, input_size=(256,256,1)):
+  tf.keras.backend.set_learning_phase(0)
+  #tf.disable_resource_variables()
   inputs = tf.keras.layers.Input(input_size)
   conv1 = tf.keras.layers.Conv2D(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(inputs)
   conv1 = tf.keras.layers.Conv2D(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv1)
@@ -60,3 +63,13 @@ def unet(pretrained_weights=None, input_size=(256,256,1)):
   	model.load_weights(pretrained_weights)
 
   return model
+
+
+
+model = unet('unet_membrane.hdf5')
+
+graph = tf.get_default_graph()
+
+with tf.gfile.GFile('temp.pb', 'wb') as f:
+  f.write(graph.as_graph_def(add_shapes=True).SerializeToString())
+
